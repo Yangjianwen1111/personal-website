@@ -1,36 +1,38 @@
-# 导入库
 import streamlit as st
 
-# 页面配置 - 宽屏模式 + 自定义标题图标
-st.set_page_config(page_title="我的博客", page_icon="📝", layout="wide")
+# 1. 用官方配置强制锁定深色主题（最关键！）
+st.set_page_config(
+    page_title="我的博客",
+    page_icon="📝",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+    menu_items=None
+)
 
-# ————————————————————————————————————————
-# 【强制锁定暗黑模式】加在这里！
-# 解决 GitHub / 线上 / 本地界面不一致
-# ————————————————————————————————————————
-st.markdown("""
-<script>
-    // 强制 Streamlit 使用深色模式
-    document.documentElement.setAttribute('data-theme', 'dark');
-    document.body.style.backgroundColor = '#0a0a0a';
-    document.body.style.color = '#ffffff';
-</script>
-""", unsafe_allow_html=True)
-
-# 高级暗黑极简样式系统 - 融合苹果/微软/特斯拉设计语言
+# 2. 用 config.toml 配置强制深色主题（Streamlit 会优先读取）
 st.markdown("""
 <style>
-    /* 全局重置与基础样式 */
-    .main {
-        background: linear-gradient(180deg, #0a0a0a 0%, #121212 100%) !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    }
-
-    /* 强制覆盖 Streamlit 自带背景 */
-    .stApp {
+    /* 第一步：强制覆盖所有 Streamlit 默认样式 */
+    [data-testid="stAppViewContainer"] {
         background: linear-gradient(180deg, #0a0a0a 0%, #121212 100%) !important;
     }
+    [data-testid="stHeader"] {
+        background-color: #0a0a0a !important;
+    }
+    [data-testid="stToolbar"] {
+        background-color: #0a0a0a !important;
+    }
+    [data-testid="stSidebar"] {
+        background-color: #0a0a0a !important;
+    }
+    [data-testid="stMarkdown"] {
+        color: #ffffff !important;
+    }
+    .stText {
+        color: #b0b0b0 !important;
+    }
 
+    /* 第二步：你的自定义深色样式 */
     /* 玻璃态卡片系统 - 参考苹果macOS Big Sur设计 */
     .card {
         background: rgba(30, 30, 30, 0.6);
@@ -72,7 +74,7 @@ st.markdown("""
 
     /* 主标题 - 大号细体字,苹果风格 */
     h1 {
-        color: #ffffff;
+        color: #ffffff !important;
         font-size: 56px;
         font-weight: 300;
         letter-spacing: -1.5px;
@@ -85,7 +87,7 @@ st.markdown("""
 
     /* 副标题 - 次级信息层级 */
     h3 {
-        color: #f0f0f0;
+        color: #f0f0f0 !important;
         font-size: 28px;
         font-weight: 400;
         letter-spacing: -0.5px;
@@ -94,7 +96,7 @@ st.markdown("""
 
     /* 正文文本 - 高可读性灰度 */
     p {
-        color: #b0b0b0;
+        color: #b0b0b0 !important;
         line-height: 1.8;
         font-size: 17px;
         font-weight: 350;
@@ -136,13 +138,13 @@ st.markdown("""
         padding-left: 20px;
         margin: 20px 0;
         font-style: italic;
-        color: #c0c0c0;
+        color: #c0c0c0 !important;
     }
 
     /* 底部版权 - 低调处理 */
     .footer {
         text-align: center;
-        color: #505050;
+        color: #505050 !important;
         font-size: 14px;
         padding: 40px 0;
         letter-spacing: 0.5px;
