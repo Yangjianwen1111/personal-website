@@ -4,13 +4,31 @@ import streamlit as st
 # 页面配置 - 宽屏模式 + 自定义标题图标
 st.set_page_config(page_title="我的博客", page_icon="📝", layout="wide")
 
+# ————————————————————————————————————————
+# 【强制锁定暗黑模式】加在这里！
+# 解决 GitHub / 线上 / 本地界面不一致
+# ————————————————————————————————————————
+st.markdown("""
+<script>
+    // 强制 Streamlit 使用深色模式
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.body.style.backgroundColor = '#0a0a0a';
+    document.body.style.color = '#ffffff';
+</script>
+""", unsafe_allow_html=True)
+
 # 高级暗黑极简样式系统 - 融合苹果/微软/特斯拉设计语言
 st.markdown("""
 <style>
     /* 全局重置与基础样式 */
     .main {
-        background: linear-gradient(180deg, #0a0a0a 0%, #121212 100%);
+        background: linear-gradient(180deg, #0a0a0a 0%, #121212 100%) !important;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    }
+
+    /* 强制覆盖 Streamlit 自带背景 */
+    .stApp {
+        background: linear-gradient(180deg, #0a0a0a 0%, #121212 100%) !important;
     }
 
     /* 玻璃态卡片系统 - 参考苹果macOS Big Sur设计 */
