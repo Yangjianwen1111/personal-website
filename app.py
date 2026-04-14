@@ -33,7 +33,7 @@ st.markdown("""
     background: rgba(15,15,25,0.9) !important;
     backdrop-filter: blur(10px);
     border-right: 1px solid rgba(255,255,255,0.06);
-    z-index: 999 !important;
+
 }
 
 /* 侧边栏开关按钮 白色高亮 绝对可用 */
@@ -42,7 +42,7 @@ button[data-testid="stSidebarCollapseButton"] {
     color: white !important;
     border-radius: 6px !important;
     padding: 6px 10px !important;
-    z-index: 9999 !important;
+
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -108,22 +108,6 @@ button[data-testid="stSidebarCollapseButton"] svg {
 </style>
 """, unsafe_allow_html=True)
 
-# ====================== 【关键】自动修复侧边栏可点击 ======================
-st.components.v1.html("""
-<script>
-// 强制让侧边栏开关按钮永远可点
-document.addEventListener('DOMContentLoaded', () => {
-    setInterval(() => {
-        const btn = document.querySelector('button[data-testid="stSidebarCollapseButton"]');
-        if (btn) {
-            btn.style.pointerEvents = 'auto';
-            btn.style.opacity = '1';
-            btn.style.display = 'flex';
-        }
-    }, 200);
-});
-</script>
-""", height=0)
 
 # ====================== 侧边栏 ======================
 with st.sidebar:
