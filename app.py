@@ -150,7 +150,7 @@ with st.sidebar:
                 st.caption(f"{curr['weather']} {curr['temperature']}")
 
     st.divider()
-    st.caption("© 2025 熊熊交友")
+    st.caption("© 2026 熊熊交友")
 
 # ======================
 # 右侧主内容
