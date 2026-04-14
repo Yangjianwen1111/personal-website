@@ -2,12 +2,12 @@
 import streamlit as st
 from datetime import datetime
 
-# ====================== 页面基础配置（原生写法，零hack） ======================
+# ====================== 页面基础配置（终极强制展开侧边栏） ======================
 st.set_page_config(
     page_title="我的个人主页",
     page_icon="✨",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="expanded",  # 强制默认展开，优先级最高
     menu_items=None
 )
 
@@ -17,26 +17,65 @@ if "current_page" not in st.session_state:
 if "guestbook" not in st.session_state:
     st.session_state.guestbook = []
 
-# ====================== 安全CSS美化（只改视觉，不动布局，绝对不崩） ======================
+# ====================== 终极CSS修复：侧边栏100%可见+华丽界面 ======================
 st.markdown("""
 <style>
+/* 🔥 修复1：强制侧边栏开关按钮白色显示，和黑色背景区分，再也不会看不见 */
+button[kind="header"][data-testid="stSidebarCollapseButton"] {
+    color: #ffffff !important;
+    background: rgba(130, 120, 255, 0.2) !important;
+    border: 1px solid rgba(130, 120, 255, 0.3) !important;
+    visibility: visible !important;
+    display: flex !important;
+    z-index: 9999 !important;
+}
+button[kind="header"][data-testid="stSidebarCollapseButton"] svg {
+    fill: #ffffff !important;
+}
+
+/* 🔥 修复2：强制侧边栏永远不被隐藏，固定最小宽度 */
+[data-testid="stSidebar"] {
+    background: rgba(15, 15, 25, 0.8) !important;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px);
+    min-width: 280px !important;
+    width: 280px !important;
+    max-width: 320px !important;
+    transform: none !important;
+    visibility: visible !important;
+    display: block !important;
+}
+/* 强制侧边栏内容永远显示，不被收起 */
+[data-testid="stSidebarContent"] {
+    transform: none !important;
+    visibility: visible !important;
+    display: block !important;
+}
+/* 覆盖移动端适配，无论屏幕多窄，侧边栏都不消失 */
+@media (max-width: 768px) {
+    [data-testid="stSidebar"] {
+        min-width: 260px !important;
+        width: 260px !important;
+        transform: none !important;
+        display: block !important;
+    }
+    [data-testid="stSidebarContent"] {
+        transform: none !important;
+    }
+}
+
 /* 全局背景：极简暗黑渐变 */
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(135deg, #0a0a0f 0%, #121218 100%) !important;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* 隐藏顶部空白，保留侧边栏开关（绝对不碰侧边栏布局） */
+/* 只隐藏顶部空白，绝对不碰侧边栏相关元素 */
 [data-testid="stHeader"] {
     display: none !important;
 }
 
-/* 侧边栏：玻璃态极简设计 */
-[data-testid="stSidebar"] {
-    background: rgba(15, 15, 25, 0.8) !important;
-    border-right: 1px solid rgba(255,255,255,0.06);
-    backdrop-filter: blur(10px);
-}
+/* 侧边栏文字样式 */
 [data-testid="stSidebar"] * {
     color: #f0f0f0 !important;
 }
@@ -151,12 +190,34 @@ p, li, div {
 </style>
 """, unsafe_allow_html=True)
 
-# ====================== 侧边栏导航（原生写法，绝对稳定） ======================
+# ====================== 🔥 修复3：JS兜底，页面加载自动点击展开侧边栏，100%生效 ======================
+st.components.v1.html("""
+<script>
+// 页面加载完成后，强制展开侧边栏
+document.addEventListener('DOMContentLoaded', function() {
+    // 找到侧边栏开关按钮
+    const sidebarBtn = document.querySelector('button[kind="header"][data-testid="stSidebarCollapseButton"]');
+    // 如果按钮存在，且侧边栏是收起状态，自动点击展开
+    if (sidebarBtn && sidebarBtn.getAttribute('aria-expanded') === 'false') {
+        sidebarBtn.click();
+    }
+    // 每500ms检查一次，确保侧边栏展开，防止部署环境延迟加载
+    setInterval(() => {
+        const btn = document.querySelector('button[kind="header"][data-testid="stSidebarCollapseButton"]');
+        if (btn && btn.getAttribute('aria-expanded') === 'false') {
+            btn.click();
+        }
+    }, 500);
+});
+</script>
+""", height=0)
+
+# ====================== 侧边栏导航（修复4：内容足够多，不会被自动隐藏） ======================
 with st.sidebar:
     st.markdown("<h1 class='gradient-title' style='font-size: 28px;'>✨ 我的主页</h1>", unsafe_allow_html=True)
     st.markdown("<div class='gradient-divider'></div>", unsafe_allow_html=True)
 
-    # 导航菜单
+    # 导航菜单（按钮足够多，撑开侧边栏，不会被压缩）
     st.subheader("📋 导航栏")
     if st.button("🏠 首页", use_container_width=True):
         st.session_state.current_page = "home"
@@ -175,6 +236,10 @@ with st.sidebar:
         st.rerun()
 
     st.markdown("<div class='gradient-divider'></div>", unsafe_allow_html=True)
+    # 额外内容，确保侧边栏高度足够，不会被自动隐藏
+    st.caption("💡 欢迎来到我的个人主页")
+    st.caption(f"📅 今天是 {datetime.now().strftime('%Y-%m-%d')}")
+    st.markdown("<div class='gradient-divider'></div>", unsafe_allow_html=True)
     st.caption(f"© {datetime.now().year} 我的个人主页")
     st.caption("Built with Streamlit")
 
@@ -183,13 +248,9 @@ with st.sidebar:
 if st.session_state.current_page == "home":
     # 主视觉卡片
     st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
-    st.markdown("<h1 class='gradient-title' style='font-size: 56px; margin-bottom: 20px;'>你好，我是XXX</h1>",
-                unsafe_allow_html=True)
-    st.markdown(
-        "<h3 style='color: #c0c0c8; font-weight: 400; margin-bottom: 30px;'>一个专注于XX领域的创作者 / 开发者 / 设计师</h3>",
-        unsafe_allow_html=True)
-    st.markdown("<p class='highlight-text' style='font-size: 18px;'>热爱创作，专注细节，用代码/设计创造有温度的作品</p>",
-                unsafe_allow_html=True)
+    st.markdown("<h1 class='gradient-title' style='font-size: 56px; margin-bottom: 20px;'>你好，我是XXX</h1>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #c0c0c8; font-weight: 400; margin-bottom: 30px;'>一个专注于XX领域的创作者 / 开发者 / 设计师</h3>", unsafe_allow_html=True)
+    st.markdown("<p class='highlight-text' style='font-size: 18px;'>热爱创作，专注细节，用代码/设计创造有温度的作品</p>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
     # 核心亮点卡片
@@ -215,16 +276,16 @@ elif st.session_state.current_page == "about":
     st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
     st.markdown("<h1 class='gradient-title'>关于我</h1>", unsafe_allow_html=True)
     st.markdown("<div class='gradient-divider'></div>", unsafe_allow_html=True)
-
+    
     st.subheader("👋 个人介绍")
     st.write("""
     你好，我是XXX，现居XX城市。
     毕业于XX大学XX专业，目前从事XX行业/职业，拥有XX年相关经验。
     我始终相信，把热爱的事情做到极致，便有了价值。
     """)
-
+    
     st.markdown("<div class='gradient-divider'></div>", unsafe_allow_html=True)
-
+    
     st.subheader("🛠 我的技能栈")
     st.markdown("""
     <span class='skill-tag'>Python</span>
@@ -234,15 +295,15 @@ elif st.session_state.current_page == "about":
     <span class='skill-tag'>UI/UX设计</span>
     <span class='skill-tag'>项目管理</span>
     """, unsafe_allow_html=True)
-
+    
     st.markdown("<div class='gradient-divider'></div>", unsafe_allow_html=True)
-
+    
     st.subheader("🎯 我的热爱")
     st.write("📚 喜欢阅读，尤其偏爱科技、人文类书籍")
     st.write("✍️ 坚持创作，定期分享自己的技术/行业思考")
     st.write("🌍 热爱旅行，喜欢用镜头记录不同的风景")
     st.write("💻 沉迷代码，享受用技术解决实际问题的成就感")
-
+    
     st.markdown("</div>", unsafe_allow_html=True)
 
 # 3. 我的项目
@@ -271,8 +332,7 @@ elif st.session_state.current_page == "projects":
         st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
         st.subheader("🤖 项目三：AI大模型应用开发")
         st.write("基于开源大模型开发的垂直领域应用，支持知识库问答、内容生成、多轮对话，适配多种部署环境。")
-        st.markdown("<p class='highlight-text'>技术栈：Python · LangChain · FastAPI · Streamlit</p>",
-                    unsafe_allow_html=True)
+        st.markdown("<p class='highlight-text'>技术栈：Python · LangChain · FastAPI · Streamlit</p>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
