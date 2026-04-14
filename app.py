@@ -401,7 +401,12 @@ p, li, div {
 """, unsafe_allow_html=True)
 
 # ====================== 左侧侧边栏：导航+晴雨表（极简高级） ======================
+# ====================== 左侧侧边栏：导航+晴雨表（极简高级） ======================
 with st.sidebar:
+    # ✅ 修复：加一个空占位符，强制侧边栏默认展开/不被隐藏
+    st.write(" ")
+    st.write(" ")
+    
     st.title("🐻 熊熊主页")
     st.markdown("<div class='divider-warm'></div>", unsafe_allow_html=True)
 
@@ -432,6 +437,11 @@ with st.sidebar:
                 st.markdown("<div class='divider-warm'></div>", unsafe_allow_html=True)
                 st.caption(f"👔 穿衣建议：{weather_data['tips']['dress']}")
                 st.caption(f"🚶 出行提醒：{weather_data['tips']['travel']}")
+
+    st.markdown("<div class='divider-warm'></div>", unsafe_allow_html=True)
+    # 陪伴计时器
+    st.caption(get_company_time())
+    st.caption("© 2026 熊熊的个人主页")
 
     st.markdown("<div class='divider-warm'></div>", unsafe_allow_html=True)
     # 陪伴计时器
