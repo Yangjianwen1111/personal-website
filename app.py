@@ -3,7 +3,7 @@ import streamlit as st
 import requests
 
 # ======================
-# 天气查询函数（你写的）
+# 天气查询函数（你的逻辑不变）
 # ======================
 def get_weather(city_name: str) -> dict:
     geocode_url = "https://geocoding-api.open-meteo.com/v1/search"
@@ -22,7 +22,7 @@ def get_weather(city_name: str) -> dict:
         geo_data = geo_response.json()
 
         if not geo_data.get("results"):
-            return {"error": f"未找到城市: {city_name}"}
+            return {"error": f"未找到城市：{city_name}"}
 
         location = geo_data["results"][0]
         latitude = location["latitude"]
@@ -71,97 +71,105 @@ def get_weather(city_name: str) -> dict:
                 "date": daily["time"][i],
                 "max_temp": f"{daily['temperature_2m_max'][i]}°C",
                 "min_temp": f"{daily['temperature_2m_min'][i]}°C",
-                "weather": weather_descriptions.get(daily['weather_code'][i], "未知")
+                "weather": weather_descriptions.get(daily["weather_code"][i], "未知")
             })
 
         return result
 
     except requests.exceptions.RequestException as e:
-        return {"error": f"请求失败: {str(e)}"}
+        return {"error": f"请求失败"}
     except Exception as e:
-        return {"error": f"发生错误: {str(e)}"}
+        return {"error": f"出错了"}
 
 # ======================
-# 页面配置
+# 页面配置（开启侧边栏）
 # ======================
 st.set_page_config(
     page_title="熊熊的主页",
     page_icon="🐻",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded"  # 左侧栏默认展开
 )
 
 # ======================
-# 强制暗黑风格
+# 全局暗黑样式
 # ======================
 st.markdown("""
 <style>
     [data-testid="stAppViewContainer"] {
         background: linear-gradient(180deg, #0a0a0a 0%, #121212 100%) !important;
     }
-    [data-testid="stHeader"] { background: #0a0a0a !important; }
+    [data-testid="stSidebar"] {
+        background-color: #111 !important;
+        border-right: 1px solid #222;
+    }
     .card {
         background: rgba(30,30,30,0.6);
-        border-radius: 24px;
-        padding: 40px;
-        margin-bottom: 30px;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 25px;
         border: 1px solid rgba(255,255,255,0.08);
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
     }
-    h1 { color: white !important; }
-    h3 { color: #f0f0f0 !important; }
-    p { color: #b0b0b0 !important; }
-    .divider { height:1px; background: rgba(255,255,255,0.1); margin:20px 0; }
+    h1, h2, h3 {
+        color: #fff !important;
+        font-weight: 300;
+    }
+    p, div {
+        color: #b0b0b0 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 # ======================
-# 网站主体
+# 左侧边栏
+# ======================
+with st.sidebar:
+    st.title("🐻 熊熊主页")
+    st.divider()
+
+    st.subheader("📋 菜单")
+    st.page_link("app.py", label="首页", icon="🏠")
+    st.page_link("app.py", label="关于我", icon="👤")
+    st.page_link("app.py", label="交友动态", icon="💬")
+
+    st.divider()
+
+    # ======================
+    # 左侧小天气查询（超精简）
+    # ======================
+    st.subheader("🌤 天气")
+    city = st.text_input("城市", placeholder="上海", label_visibility="collapsed")
+    if st.button("查询"):
+        if city:
+            res = get_weather(city)
+            if "error" in res:
+                st.caption(f"❌ {res['error']}")
+            else:
+                curr = res["current"]
+                st.caption(f"📍 {res['city']}")
+                st.caption(f"{curr['weather']} {curr['temperature']}")
+
+    st.divider()
+    st.caption("© 2025 熊熊交友")
+
+# ======================
+# 右侧主内容
 # ======================
 st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.title("🐻 熊熊的主页")
-st.write("真诚交友 · 温暖陪伴 · 双向奔赴")
-st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
-st.write("毕业于上海大学 · 退役军人 · 热爱生活")
+st.title("🐻 欢迎来到熊熊的交友主页")
+st.write("真诚、稳重、热爱生活")
 st.markdown("</div>", unsafe_allow_html=True)
 
-# ======================
-# ✅ 天气查询功能（已嵌入）
-# ======================
-st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.subheader("🌤️ 天气查询工具")
-city = st.text_input("请输入城市名称：", placeholder="例如：上海 北京 广州")
-
-if st.button("🔍 查询天气"):
-    if city:
-        data = get_weather(city)
-        if "error" in data:
-            st.error(data["error"])
-        else:
-            st.success(f"📍 {data['city']}, {data['country']}")
-            c = data["current"]
-            st.write(f"🌤 当前天气：{c['weather']}")
-            st.write(f"🌡 温度：{c['temperature']} | 体感：{c['feels_like']}")
-            st.write(f"💧 湿度：{c['humidity']} | 💨 风速：{c['wind_speed']}")
-
-            st.subheader("📅 未来3天预报")
-            for day in data["forecast"]:
-                st.write(f"{day['date']} | {day['min_temp']} ~ {day['max_temp']} | {day['weather']}")
-st.markdown("</div>", unsafe_allow_html=True)
-
-# ======================
-# 关于我
-# ======================
 st.markdown("<div class='card'>", unsafe_allow_html=True)
 st.subheader("关于我")
 st.write("""
 你好，我是熊熊。
-毕业于上海大学，曾服役于部队，性格稳重、待人真诚。
-期待认识同样真诚、温暖、热爱生活的朋友～
+毕业于上海大学，曾服役于部队，性格踏实稳重，待人真诚。
+期待认识温暖、靠谱、三观契合的朋友。
 """)
 st.markdown("</div>", unsafe_allow_html=True)
 
-# ======================
-# 页脚
-# ======================
-st.markdown("<div style='text-align:center;color:#666;margin-top:50px'>© 2025 熊熊的交友主页</div>", unsafe_allow_html=True)
+st.markdown("<div class='card'>", unsafe_allow_html=True)
+st.subheader("交友理念")
+st.write("尊重、真诚、双向奔赴，不敷衍、不冷暴力。")
+st.markdown("</div>", unsafe_allow_html=True)
