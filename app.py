@@ -30,10 +30,21 @@ st.markdown("""
 
 /* 侧边栏强制可见 */
 [data-testid="stSidebar"] {
-    background: rgba(15,15,25,0.9) !important;
+    background: rgba(15,15,25,0.95) !important;
     backdrop-filter: blur(10px);
     border-right: 1px solid rgba(255,255,255,0.06);
+}
 
+[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+    color: white !important;
+}
+
+[data-testid="stSidebar"] .stMarkdown,
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] p {
+    color: white !important;
 }
 
 /* 侧边栏开关按钮 白色高亮 绝对可用 */
@@ -42,10 +53,11 @@ button[data-testid="stSidebarCollapseButton"] {
     color: white !important;
     border-radius: 6px !important;
     padding: 6px 10px !important;
-
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
+    position: relative !important;
+    z-index: 9999 !important;
 }
 button[data-testid="stSidebarCollapseButton"] svg {
     fill: white !important;
@@ -77,7 +89,7 @@ button[data-testid="stSidebarCollapseButton"] svg {
 /* 按钮 */
 .stButton>button {
     background: rgba(130,120,255,0.1) !important;
-    color: white !important;
+    color: #ffffff !important;
     border: 1px solid rgba(130,120,255,0.3) !important;
     border-radius: 12px !important;
     padding: 10px 24px !important;
@@ -86,6 +98,11 @@ button[data-testid="stSidebarCollapseButton"] svg {
 .stButton>button:hover {
     background: rgba(130,120,255,0.2) !important;
     border-color: #8278ff !important;
+    color: #ffffff !important;
+}
+
+.stButton>button p {
+    color: #ffffff !important;
 }
 
 /* 技能标签 */
@@ -104,6 +121,20 @@ button[data-testid="stSidebarCollapseButton"] svg {
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(130,120,255,0.4), transparent);
     margin: 24px 0;
+}
+
+/* 文本颜色修复 */
+.stMarkdown,
+.stText,
+h1, h2, h3, h4, h5, h6,
+p, span, div {
+    color: inherit;
+}
+
+.stMarkdown h1,
+.stMarkdown h2,
+.stMarkdown h3 {
+    color: white !important;
 }
 </style>
 """, unsafe_allow_html=True)
