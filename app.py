@@ -145,7 +145,7 @@ with st.sidebar:
                 st.info(f"温度：{curr['temperature']}")
 
     st.divider()
-    st.caption("© 2025 熊熊交友平台")
+    st.caption("© 2026 熊熊交友平台")
 
 # ======================
 # 右侧主内容
