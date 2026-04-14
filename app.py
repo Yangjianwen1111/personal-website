@@ -15,7 +15,7 @@ st.set_page_config(
     page_title="熊熊的个人主页",
     page_icon="🐻",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="expanded",  # 强制默认展开侧边栏
     menu_items=None
 )
 
@@ -49,7 +49,7 @@ local_warm_qa = {
     "你是谁": "我是熊熊，一个想给你带来温暖和安全感的人，当过兵，毕业于上海大学，性格稳重又温柔。",
     "当兵辛苦吗": "挺辛苦的，但也让我学会了担当和责任，更懂得怎么好好照顾身边的人。",
     "哪个学校毕业的": "上海大学，已经毕业啦，很怀念在学校的日子。",
-    "性格怎么样": "我性格比较稳重，有耐心，不敷衍，会很用心地对待身边的人，想做一个靠谱又温柔的人。",
+    "性格怎么样": "我性格比较稳重，有耐心，不敷衍，会用心对待身边的人，想做靠谱又温柔的人。",
     "会疼人吗": "当然会啦，我会把所有的温柔和细心都给你，好好照顾你的情绪。",
     "今天天气怎么样": "你可以在左边的晴雨表里查一下哦，我也会帮你看好天气，提醒你添衣带伞。",
     "谢谢": "不用跟我客气呀，能被你需要，我也很开心。",
@@ -75,7 +75,7 @@ local_warm_qa = {
     "会哄人吗": "会的，你不开心了，我就哄你，一直哄到你开心为止。",
     "生气吗": "我很少生气，脾气很好，更不会对你发脾气。",
     "凶吗": "不凶，我只对你温柔，永远都不会凶你。",
-    "成熟稳重吗": "是的，当过兵的经历让我变得成熟稳重，有担当，能给你足够的依靠。",
+    "成熟稳重吗": "是的，当过兵的经历让我成熟稳重，有担当，能给你足够的依靠。",
     "可以见面吗": "等我们慢慢熟悉了，时机到了，当然可以见面呀。",
     "处对象吗": "可以呀，我们可以慢慢了解，慢慢相处，我会好好对你的。",
     "在一起吗": "好呀，那以后，就让我陪着你，一起走下去吧。",
@@ -260,11 +260,11 @@ def get_company_time():
         minutes = total_minutes % 60
         return f"熊熊已经陪了你 {hours} 小时 {minutes} 分钟啦"
 
-# ====================== ✅ 核心修复：用最具体的CSS选择器，强制修改输入框样式，100%解决问题 ======================
+# ====================== ✅ 修复CSS：不再隐藏侧边栏开关 ======================
 st.markdown("""
 <style>
-/* 隐藏顶部默认白边和工具栏 */
-[data-testid="stHeader"], [data-testid="stToolbar"] {
+/* 只隐藏顶部白边，不隐藏侧边栏按钮！ */
+[data-testid="stHeader"] {
     display: none !important;
 }
 
@@ -338,13 +338,12 @@ p, li, div {
     margin: 0 !important;
 }
 
-/* ====================== 核心修复：精准定位所有输入框，强制深色背景+白色文字 ====================== */
-/* 通用输入框样式 */
+/* 输入框样式 */
 [data-testid="stTextInput"] > div > div > input {
-    background-color: #1a1a1a !important; /* 深色背景，和整体风格一致 */
+    background-color: #1a1a1a !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     border-radius: 12px !important;
-    color: #ffffff !important; /* 纯白色文字，100%清晰 */
+    color: #ffffff !important;
     padding: 12px 16px !important;
     font-size: 16px !important;
 }
@@ -353,16 +352,16 @@ p, li, div {
     box-shadow: 0 0 0 1px rgba(255, 183, 107, 0.2) !important;
 }
 [data-testid="stTextInput"] > div > div > input::placeholder {
-    color: rgba(255, 255, 255, 0.5) !important; /* 半透明白色提示文字 */
+    color: rgba(255, 255, 255, 0.5) !important;
 }
 
-/* 侧边栏输入框单独优化，确保和主页面一致 */
+/* 侧边栏输入框 */
 [data-testid="stSidebar"] [data-testid="stTextInput"] > div > div > input {
     background-color: #222222 !important;
     color: #ffffff !important;
 }
 
-/* ====================== 聊天气泡文字高亮清晰，暗黑模式完美适配 ====================== */
+/* 聊天气泡 */
 .user-bubble {
     background: rgba(255, 183, 107, 0.15);
     border-radius: 18px 18px 4px 18px;
@@ -391,7 +390,6 @@ p, li, div {
     font-weight: 400 !important;
 }
 
-/* 分割线样式：高级 */
 .divider-warm {
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(255, 183, 107, 0.3), transparent);
@@ -400,17 +398,12 @@ p, li, div {
 </style>
 """, unsafe_allow_html=True)
 
-# ====================== 左侧侧边栏：导航+晴雨表（极简高级） ======================
-# ====================== 左侧侧边栏：导航+晴雨表（极简高级） ======================
+# ====================== 左侧侧边栏：已修复，无重复，永久显示 ======================
 with st.sidebar:
-    # ✅ 修复：加一个空占位符，强制侧边栏默认展开/不被隐藏
-    st.write(" ")
-    st.write(" ")
-    
     st.title("🐻 熊熊主页")
     st.markdown("<div class='divider-warm'></div>", unsafe_allow_html=True)
 
-    # 导航菜单：无报错路由切换
+    # 导航菜单
     st.subheader("📋 导航")
     if st.button("🏠 首页", use_container_width=True):
         st.session_state.current_page = "home"
@@ -421,7 +414,7 @@ with st.sidebar:
 
     st.markdown("<div class='divider-warm'></div>", unsafe_allow_html=True)
 
-    # 熊熊晴雨表（暖男升级款，输入框已修复）
+    # 熊熊晴雨表
     st.subheader("🌤 熊熊晴雨表")
     city_input = st.text_input("城市", placeholder="输入城市名", label_visibility="collapsed")
     if st.button("查询天气", use_container_width=True):
@@ -439,26 +432,18 @@ with st.sidebar:
                 st.caption(f"🚶 出行提醒：{weather_data['tips']['travel']}")
 
     st.markdown("<div class='divider-warm'></div>", unsafe_allow_html=True)
-    # 陪伴计时器
-    st.caption(get_company_time())
-    st.caption("© 2026 熊熊的个人主页")
-
-    st.markdown("<div class='divider-warm'></div>", unsafe_allow_html=True)
-    # 陪伴计时器
     st.caption(get_company_time())
     st.caption("© 2026 熊熊的个人主页")
 
 # ====================== 主内容区：页面路由切换 ======================
 # 1. 首页
 if st.session_state.current_page == "home":
-    # 欢迎卡片
     st.markdown("<div class='advanced-card'>", unsafe_allow_html=True)
     st.title("你好，我是熊熊 🐻")
     st.markdown(f"<p class='warm-text'>{get_random_warm_note()}</p>", unsafe_allow_html=True)
     st.write("毕业于上海大学 · 退役军人 · 温柔稳重 · 真诚可靠")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # 核心功能介绍
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("<div class='advanced-card'>", unsafe_allow_html=True)
@@ -478,7 +463,6 @@ elif st.session_state.current_page == "chat":
     st.write(f"<p class='warm-text'>{get_company_time()}</p>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # 聊天历史展示
     st.markdown("<div class='advanced-card'>", unsafe_allow_html=True)
     for chat in st.session_state.chat_history:
         if chat["role"] == "user":
@@ -487,34 +471,26 @@ elif st.session_state.current_page == "chat":
             st.markdown(f"<div class='xiongxiong-bubble'><p>{chat['content']}</p></div>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # 快捷提问按钮
     st.caption("💡 快捷提问：")
     q_col1, q_col2, q_col3, q_col4, q_col5 = st.columns(5)
     quick_cols = [q_col1, q_col2, q_col3, q_col4, q_col5]
     for idx, question in enumerate(quick_questions):
         with quick_cols[idx]:
             if st.button(question, key=f"quick_{idx}"):
-                # 添加用户消息
                 st.session_state.chat_history.append({"role": "user", "content": question})
-                # 获取熊熊回复
                 reply = xiongxiong_reply(question)
                 st.session_state.chat_history.append({"role": "xiongxiong", "content": reply})
                 st.rerun()
 
-    # ====================== ✅ 优化版：输入框发送后100%自动清空 ======================
     def send_message():
         user_input = st.session_state.chat_input_value
         if user_input.strip():
-            # 添加用户消息到聊天历史
             st.session_state.chat_history.append({"role": "user", "content": user_input})
-            # 获取熊熊回复
             with st.spinner("熊熊正在认真回复..."):
                 reply = xiongxiong_reply(user_input)
             st.session_state.chat_history.append({"role": "xiongxiong", "content": reply})
-            # 关键：发送后清空输入框
             st.session_state.chat_input_value = ""
 
-    # 绑定输入框和发送逻辑
     st.text_input(
         "你想跟熊熊说什么：",
         key="chat_input_value",
@@ -522,7 +498,6 @@ elif st.session_state.current_page == "chat":
         label_visibility="collapsed",
         on_change=send_message
     )
-    # 发送按钮
     st.button("🐻 发送", use_container_width=True, on_click=send_message)
 
 # 3. 关于我页面
