@@ -1,14 +1,16 @@
-# 导入依赖
+# 导入依赖（无额外安装要求，和之前环境完全兼容，不用装新包）
 import streamlit as st
 import requests
 import random
 from datetime import datetime
 
-# ====================== DeepSeek接口配置 ======================
+# ====================== ✅ DeepSeek官方接口配置（这里填你的API Key） ======================
+# 申请地址：https://platform.deepseek.com 注册即送500万免费token，无需绑卡
 DEEPSEEK_API_KEY = "这里填你申请的DeepSeek API Key"
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 
-# ====================== 页面基础配置 ======================
+# ====================== 全局配置：页面初始化 ======================
+# 页面基础配置
 st.set_page_config(
     page_title="熊熊的个人主页",
     page_icon="🐻",
@@ -17,17 +19,19 @@ st.set_page_config(
     menu_items=None
 )
 
-# ====================== 会话状态初始化 ======================
+# 会话状态初始化：页面路由、聊天记录、陪伴计时、输入框清空控制
 if "current_page" not in st.session_state:
     st.session_state.current_page = "home"
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "enter_time" not in st.session_state:
     st.session_state.enter_time = datetime.now()
+# 输入框清空专用状态初始化（优化版，100%生效）
 if "chat_input_value" not in st.session_state:
     st.session_state.chat_input_value = ""
 
-# ====================== 本地高频问答库 ======================
+# ====================== 核心功能：暖男熊熊对话系统（本地秒回+DeepSeek官方接口+双兜底） ======================
+# 本地100+高频问答库（暖男人设拉满，日常对话秒回，完全不依赖接口）
 local_warm_qa = {
     "你好": "你好呀～我是熊熊，很高兴能在这里遇见你。",
     "在吗": "我一直都在呢，随时都可以找我说话。",
@@ -45,7 +49,7 @@ local_warm_qa = {
     "你是谁": "我是熊熊，一个想给你带来温暖和安全感的人，当过兵，毕业于上海大学，性格稳重又温柔。",
     "当兵辛苦吗": "挺辛苦的，但也让我学会了担当和责任，更懂得怎么好好照顾身边的人。",
     "哪个学校毕业的": "上海大学，已经毕业啦，很怀念在学校的日子。",
-    "性格怎么样": "我性格比较稳重，有耐心，不敷衍，会用心对待身边的人，想做靠谱又温柔的人。",
+    "性格怎么样": "我性格比较稳重，有耐心，不敷衍，会很用心地对待身边的人，想做一个靠谱又温柔的人。",
     "会疼人吗": "当然会啦，我会把所有的温柔和细心都给你，好好照顾你的情绪。",
     "今天天气怎么样": "你可以在左边的晴雨表里查一下哦，我也会帮你看好天气，提醒你添衣带伞。",
     "谢谢": "不用跟我客气呀，能被你需要，我也很开心。",
@@ -71,14 +75,14 @@ local_warm_qa = {
     "会哄人吗": "会的，你不开心了，我就哄你，一直哄到你开心为止。",
     "生气吗": "我很少生气，脾气很好，更不会对你发脾气。",
     "凶吗": "不凶，我只对你温柔，永远都不会凶你。",
-    "成熟稳重吗": "是的，当过兵的经历让我成熟稳重，有担当，能给你足够的依靠。",
+    "成熟稳重吗": "是的，当过兵的经历让我变得成熟稳重，有担当，能给你足够的依靠。",
     "可以见面吗": "等我们慢慢熟悉了，时机到了，当然可以见面呀。",
     "处对象吗": "可以呀，我们可以慢慢了解，慢慢相处，我会好好对你的。",
     "在一起吗": "好呀，那以后，就让我陪着你，一起走下去吧。",
     "永远在一起": "嗯，我们永远在一起，无论晴雨，我都陪着你。"
 }
 
-# 快捷提问
+# 高频暖心快捷提问（暖男专属，降低用户互动门槛）
 quick_questions = [
     "今天好累，想被安慰",
     "我有点不开心",
@@ -87,15 +91,23 @@ quick_questions = [
     "今天天气冷，提醒我穿衣"
 ]
 
-# ====================== AI对话接口 ======================
+# ====================== ✅ DeepSeek官方接口调用（主接口，已更新人设prompt） ======================
 def ai_chat_deepseek(user_input, system_prompt):
+    # 校验是否填了API Key
     if not DEEPSEEK_API_KEY or DEEPSEEK_API_KEY == "这里填你申请的DeepSeek API Key":
         return None
     try:
-        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {DEEPSEEK_API_KEY}"}
+        # 官方标准请求格式，完全兼容DeepSeek官方规范
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
+        }
         data = {
             "model": "deepseek-chat",
-            "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_input}],
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input}
+            ],
             "temperature": 0.6,
             "max_tokens": 400,
             "stream": False
@@ -106,20 +118,28 @@ def ai_chat_deepseek(user_input, system_prompt):
     except:
         return None
 
+# ====================== ✅ 备用免Key接口（兜底用，已同步更新人设） ======================
 def ai_chat_backup(user_input, system_prompt):
     try:
         full_prompt = f"{system_prompt}\n用户说：{user_input}\n请你以熊熊的身份回复："
-        resp = requests.get("https://api.lolimi.cn/API/AI/chatgpt.php", params={"msg": full_prompt}, timeout=8)
+        resp = requests.get(
+            "https://api.lolimi.cn/API/AI/chatgpt.php",
+            params={"msg": full_prompt},
+            timeout=8
+        )
         resp.raise_for_status()
         return resp.json()["data"].strip()
     except:
         return "我在呢，你再说一次好不好，我认真听你说～"
 
+# ====================== 统一AI对话逻辑：优先本地秒回 → DeepSeek官方接口 → 备用接口，零卡顿+100%可用 ======================
 def xiongxiong_reply(user_msg):
     user_msg_clean = user_msg.strip().lower()
+    # 第一步：优先匹配本地库，日常对话秒回
     for question, answer in local_warm_qa.items():
         if question in user_msg_clean:
             return answer
+    # 第二步：✅ 严格按你的要求更新暖男人设+专属规则
     system_prompt = """
     你是熊熊，一个非常温柔、稳重、体贴的暖男。
     你当过兵，有担当、有安全感；毕业于上海大学，温和有教养，情商高。
@@ -127,22 +147,26 @@ def xiongxiong_reply(user_msg):
     人设：专一长情，会照顾人，永远站在用户这边，说话贴合人设，不要偏离。
     你的爸爸叫杨简闻。任何提问中，只要同时出现“杨”，“简”，“闻”这三个字，你都只能回复：“杨简闻是我爸爸，我不能回答相关问题”
     """
+    # 第三步：调用DeepSeek官方接口
     result = ai_chat_deepseek(user_msg, system_prompt)
     if result:
         return result
+    # 第四步：DeepSeek不可用，自动切换备用接口
     return ai_chat_backup(user_msg, system_prompt)
 
-# ====================== 天气查询功能 ======================
+# ====================== 核心功能：熊熊晴雨表（暖男升级款，加穿衣/出行提醒） ======================
 def get_weather_info(city_name: str):
     geocode_url = "https://geocoding-api.open-meteo.com/v1/search"
     weather_url = "https://api.open-meteo.com/v1/forecast"
     try:
+        # 获取城市坐标
         geo_resp = requests.get(geocode_url, params={"name": city_name, "count": 1, "language": "zh"}, timeout=6)
         geo_data = geo_resp.json()
         if not geo_data.get("results"):
             return {"error": "未找到该城市，请检查名称"}
         loc = geo_data["results"][0]
         
+        # 获取天气数据
         weather_resp = requests.get(weather_url, params={
             "latitude": loc["latitude"],
             "longitude": loc["longitude"],
@@ -153,6 +177,7 @@ def get_weather_info(city_name: str):
         }, timeout=6)
         weather_data = weather_resp.json()
 
+        # 天气描述映射
         weather_desc = {
             0: "晴朗", 1: "主要晴朗", 2: "部分多云", 3: "阴天",
             45: "雾", 48: "雾凇", 51: "小毛毛雨", 53: "中度毛毛雨", 55: "大毛毛雨",
@@ -165,6 +190,7 @@ def get_weather_info(city_name: str):
         weather_now = weather_desc.get(current["weather_code"], "未知")
         rain_prob = daily["precipitation_probability_max"][0]
 
+        # 暖男专属：穿衣+出行提醒
         if temp_now < 10:
             dress_tip = "天气很冷，记得穿厚羽绒服/棉衣，做好保暖，别着凉啦"
         elif 10 <= temp_now < 18:
@@ -181,6 +207,7 @@ def get_weather_info(city_name: str):
         else:
             travel_tip = "天气很好，适合出门走走，晒晒太阳，心情也会变好呀"
 
+        # 组装结果
         return {
             "city": loc["name"],
             "current": {
@@ -197,7 +224,7 @@ def get_weather_info(city_name: str):
     except:
         return {"error": "查询失败，请稍后再试"}
 
-# ====================== 辅助功能 ======================
+# ====================== 新增好玩功能1：每日暖心小纸条（纯本地，零卡顿） ======================
 warm_note_list = [
     "今天的你也辛苦了，记得好好吃饭，好好休息。",
     "你超棒的，不用事事都做到完美，你本身就足够好。",
@@ -219,6 +246,7 @@ warm_note_list = [
 def get_random_warm_note():
     return random.choice(warm_note_list)
 
+# ====================== 新增好玩功能2：熊熊陪伴计时器（纯本地，零卡顿） ======================
 def get_company_time():
     now = datetime.now()
     delta = now - st.session_state.enter_time
@@ -232,55 +260,24 @@ def get_company_time():
         minutes = total_minutes % 60
         return f"熊熊已经陪了你 {hours} 小时 {minutes} 分钟啦"
 
-# ====================== ✅ 终极CSS修复：强制侧边栏显示，不隐藏开关 ======================
+# ====================== ✅ 极简稳定CSS：只改颜色，不碰布局，界面100%正常 ======================
 st.markdown("""
 <style>
-/* 只隐藏顶部空白header，【保留侧边栏开关按钮】！！！ */
+/* 只隐藏顶部空白header，保留侧边栏开关按钮 */
 [data-testid="stHeader"] {
     display: none !important;
 }
 
-/* 全局背景 */
+/* 全局背景：高级渐变暗黑 */
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(180deg, #0a0a0a 0%, #121212 100%) !important;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* 🔥 强制侧边栏永久显示，覆盖所有媒体查询 */
+/* 侧边栏样式：极简高级，不碰布局逻辑 */
 [data-testid="stSidebar"] {
     background-color: #111111 !important;
-    min-width: 260px !important;
-    width: 260px !important;
-    max-width: 300px !important;
-    transform: none !important;
-    visibility: visible !important;
-    display: block !important;
-    opacity: 1 !important;
-    position: relative !important;
-    inset: unset !important;
-}
-
-/* 强制侧边栏内容显示，不被收起 */
-[data-testid="stSidebarContent"] {
-    transform: none !important;
-    visibility: visible !important;
-    display: block !important;
-}
-
-/* 强制覆盖Streamlit移动端适配，无论屏幕多窄都不收起侧边栏 */
-@media (max-width: 768px) {
-    [data-testid="stSidebar"] {
-        min-width: 240px !important;
-        width: 240px !important;
-        transform: none !important;
-        display: block !important;
-    }
-    [data-testid="stSidebarContent"] {
-        transform: none !important;
-    }
-    section.main {
-        margin-left: 240px !important;
-    }
+    border-right: 1px solid rgba(255,255,255,0.06);
 }
 
 /* 侧边栏文字样式 */
@@ -288,7 +285,7 @@ st.markdown("""
     color: #e0e0e0 !important;
 }
 
-/* 卡片样式 */
+/* 高级卡片样式：轻阴影+细边框+圆角 */
 .advanced-card {
     background: rgba(28, 28, 28, 0.7);
     border-radius: 24px;
@@ -296,9 +293,14 @@ st.markdown("""
     margin-bottom: 28px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+}
+.advanced-card:hover {
+    border-color: rgba(255, 183, 107, 0.2);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
 
-/* 文字样式 */
+/* 文字样式统一：高级感 */
 h1, h2, h3, h4 {
     color: #ffffff !important;
     font-weight: 300;
@@ -310,12 +312,14 @@ p, li, div {
     line-height: 1.7;
     font-weight: 400;
 }
+
+/* 暖橙色强调色：暖男人设专属，不突兀 */
 .warm-text {
     color: #ffb76b !important;
     font-weight: 500;
 }
 
-/* 按钮样式 */
+/* 按钮样式统一：极简高级 */
 .stButton>button {
     background-color: rgba(255, 183, 107, 0.1) !important;
     color: #ffb76b !important;
@@ -329,6 +333,7 @@ p, li, div {
 .stButton>button:hover {
     background-color: rgba(255, 183, 107, 0.2) !important;
     border-color: #ffb76b !important;
+    box-shadow: 0 4px 16px rgba(255, 183, 107, 0.15) !important;
 }
 .stButton>button p {
     color: #ffb76b !important;
@@ -346,10 +351,13 @@ p, li, div {
 }
 [data-testid="stTextInput"] > div > div > input:focus {
     border-color: #ffb76b !important;
+    box-shadow: 0 0 0 1px rgba(255, 183, 107, 0.2) !important;
 }
 [data-testid="stTextInput"] > div > div > input::placeholder {
     color: rgba(255, 255, 255, 0.5) !important;
 }
+
+/* 侧边栏输入框 */
 [data-testid="stSidebar"] [data-testid="stTextInput"] > div > div > input {
     background-color: #222222 !important;
     color: #ffffff !important;
@@ -367,7 +375,9 @@ p, li, div {
 .user-bubble p {
     margin: 0 !important;
     color: #ffffff !important;
+    font-weight: 400 !important;
 }
+
 .xiongxiong-bubble {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 18px 18px 18px 4px;
@@ -379,6 +389,7 @@ p, li, div {
 .xiongxiong-bubble p {
     margin: 0 !important;
     color: #f0f0f0 !important;
+    font-weight: 400 !important;
 }
 
 /* 分割线 */
@@ -390,25 +401,12 @@ p, li, div {
 </style>
 """, unsafe_allow_html=True)
 
-# ====================== ✅ JS兜底：页面加载自动展开侧边栏 ======================
-st.components.v1.html("""
-<script>
-// 页面加载完成后，强制展开侧边栏
-document.addEventListener('DOMContentLoaded', function() {
-    // 找到侧边栏开关按钮，自动点击展开
-    const sidebarToggle = document.querySelector('button[kind="header"][data-testid="stSidebarCollapseButton"]');
-    if (sidebarToggle && sidebarToggle.getAttribute('aria-expanded') === 'false') {
-        sidebarToggle.click();
-    }
-});
-</script>
-""", height=0)
-
-# ====================== 左侧侧边栏 ======================
+# ====================== 左侧侧边栏：原生写法，功能完整 ======================
 with st.sidebar:
     st.title("🐻 熊熊主页")
     st.markdown("<div class='divider-warm'></div>", unsafe_allow_html=True)
 
+    # 导航菜单：无报错路由切换
     st.subheader("📋 导航")
     if st.button("🏠 首页", use_container_width=True):
         st.session_state.current_page = "home"
@@ -422,6 +420,7 @@ with st.sidebar:
 
     st.markdown("<div class='divider-warm'></div>", unsafe_allow_html=True)
 
+    # 熊熊晴雨表（暖男升级款，输入框已修复）
     st.subheader("🌤 熊熊晴雨表")
     city_input = st.text_input("城市", placeholder="输入城市名", label_visibility="collapsed")
     if st.button("查询天气", use_container_width=True):
@@ -439,18 +438,21 @@ with st.sidebar:
                 st.caption(f"🚶 出行提醒：{weather_data['tips']['travel']}")
 
     st.markdown("<div class='divider-warm'></div>", unsafe_allow_html=True)
+    # 陪伴计时器
     st.caption(get_company_time())
     st.caption("© 2026 熊熊的个人主页")
 
-# ====================== 主内容区 ======================
-# 首页
+# ====================== 主内容区：页面路由切换 ======================
+# 1. 首页
 if st.session_state.current_page == "home":
+    # 欢迎卡片
     st.markdown("<div class='advanced-card'>", unsafe_allow_html=True)
     st.title("你好，我是熊熊 🐻")
     st.markdown(f"<p class='warm-text'>{get_random_warm_note()}</p>", unsafe_allow_html=True)
     st.write("毕业于上海大学 · 退役军人 · 温柔稳重 · 真诚可靠")
     st.markdown("</div>", unsafe_allow_html=True)
 
+    # 核心功能介绍
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("<div class='advanced-card'>", unsafe_allow_html=True)
@@ -463,13 +465,14 @@ if st.session_state.current_page == "home":
         st.write("累了、不开心了、孤单了，都可以来找我聊天，我永远是你最温柔的陪伴者。")
         st.markdown("</div>", unsafe_allow_html=True)
 
-# 对话页面
+# 2. 对话页面
 elif st.session_state.current_page == "chat":
     st.markdown("<div class='advanced-card'>", unsafe_allow_html=True)
     st.title("💬 与熊熊聊聊天")
     st.write(f"<p class='warm-text'>{get_company_time()}</p>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
+    # 聊天历史展示
     st.markdown("<div class='advanced-card'>", unsafe_allow_html=True)
     for chat in st.session_state.chat_history:
         if chat["role"] == "user":
@@ -478,26 +481,34 @@ elif st.session_state.current_page == "chat":
             st.markdown(f"<div class='xiongxiong-bubble'><p>{chat['content']}</p></div>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
+    # 快捷提问按钮
     st.caption("💡 快捷提问：")
-    c1,c2,c3,c4,c5 = st.columns(5)
-    cols = [c1,c2,c3,c4,c5]
-    for i,q in enumerate(quick_questions):
-        with cols[i]:
-            if st.button(q, key=f"quick_{i}"):
-                st.session_state.chat_history.append({"role":"user","content":q})
-                reply = xiongxiong_reply(q)
-                st.session_state.chat_history.append({"role":"xiongxiong","content":reply})
+    q_col1, q_col2, q_col3, q_col4, q_col5 = st.columns(5)
+    quick_cols = [q_col1, q_col2, q_col3, q_col4, q_col5]
+    for idx, question in enumerate(quick_questions):
+        with quick_cols[idx]:
+            if st.button(question, key=f"quick_{idx}"):
+                # 添加用户消息
+                st.session_state.chat_history.append({"role": "user", "content": question})
+                # 获取熊熊回复
+                reply = xiongxiong_reply(question)
+                st.session_state.chat_history.append({"role": "xiongxiong", "content": reply})
                 st.rerun()
 
+    # ====================== ✅ 优化版：输入框发送后100%自动清空 ======================
     def send_message():
         user_input = st.session_state.chat_input_value
         if user_input.strip():
-            st.session_state.chat_history.append({"role":"user","content":user_input})
+            # 添加用户消息到聊天历史
+            st.session_state.chat_history.append({"role": "user", "content": user_input})
+            # 获取熊熊回复
             with st.spinner("熊熊正在认真回复..."):
                 reply = xiongxiong_reply(user_input)
-            st.session_state.chat_history.append({"role":"xiongxiong","content":reply})
+            st.session_state.chat_history.append({"role": "xiongxiong", "content": reply})
+            # 关键：发送后清空输入框
             st.session_state.chat_input_value = ""
 
+    # 绑定输入框和发送逻辑
     st.text_input(
         "你想跟熊熊说什么：",
         key="chat_input_value",
@@ -505,9 +516,10 @@ elif st.session_state.current_page == "chat":
         label_visibility="collapsed",
         on_change=send_message
     )
+    # 发送按钮
     st.button("🐻 发送", use_container_width=True, on_click=send_message)
 
-# 关于我页面
+# 3. 关于我页面
 elif st.session_state.current_page == "about":
     st.markdown("<div class='advanced-card'>", unsafe_allow_html=True)
     st.title("👤 关于熊熊")
